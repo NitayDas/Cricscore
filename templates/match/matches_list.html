@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matches List</title>
+    <style>
+        /* Add your CSS styles here */
+        .match-container {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .match-details {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Recent Matches</h1>
+    <ul>
+        {% for type_match in matches.typeMatches %}
+            <li>
+                <h2>{{ type_match.matchType }}</h2>
+                <ul>
+                    {% for series_match in type_match.seriesMatches %}
+                        {% if series_match.seriesAdWrapper %}
+                            <li>
+                                <h3>{{ series_match.seriesAdWrapper.seriesName }}</h3>
+                                    {% for match in series_match.seriesAdWrapper.matches %}
+                                      <div style="background: #999;">
+                                            {% comment %} <h4>{{ match.matchInfo.seriesName }}</h4> {% endcomment %}
+                                            <p>{{match.matchInfo.state}}</p>
+                                            <p style="color: green;">{{match.matchInfo.team1.teamName}}  vs  {{match.matchInfo.team2.teamName}}</p>
+                                            <p><strong>{{ match.matchInfo.matchDesc }}</strong></p>
+                                            <p><strong>{{ match.matchInfo.status }}</strong></p> 
+                                            <p>Venue: {{ match.matchInfo.venueInfo.ground }}, {{ match.matchInfo.venueInfo.city }}</p>
+                                      </div>
+                                    {% endfor %}
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
