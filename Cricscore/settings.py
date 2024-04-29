@@ -39,8 +39,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'corsheaders',
     'django_celery_beat',
     'match',
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173" # Add the origin of your React app
 ]
 
 MIDDLEWARE = [
@@ -51,6 +56,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'Cricscore.urls'
@@ -139,5 +145,11 @@ CELERY_TIMEZONE = 'UTC'
 
 #Celery_beat settings
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers.DatabaseScheduler'
+
+
+#react settings
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, r'F:/Rest Api/Cricscore/CrickieHunger/build/static'),
+# ]
 
 

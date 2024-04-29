@@ -16,10 +16,15 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 #celery_beat setting
 
 app.conf.beat_schedule = {
-    'fetch-matches-every-20-minutes': {
+    'fetch-matches-every-2-minutes': {
         'task': 'match.tasks.fetch_matches_from_api',
-        'schedule': crontab(minute='*/20'),
+        'schedule': crontab(minute='*/2'),
     },
+    
+    # 'update-matches-every-1-minutes': {
+    #     'task': 'match.tasks.update_matches_from_api',
+    #     'schedule': crontab(minute='*/1'),
+    # },
 }
 
 
@@ -28,5 +33,3 @@ app.autodiscover_tasks()
 @app.task(bind=True)
 def debug_task(self):
     print(f'Request:{self.request}')
-
-

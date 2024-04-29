@@ -1,9 +1,8 @@
 from django.urls import path
 from . import views
+from .views import MatchesList
 
 urlpatterns = [
     path('', views.home, name = 'home'),
-    path('matches/', views.get_matches_list, name='matches'),
-    # path('upcomingmatches/', views.get_matches_list, name='upcoming_match'),
-    # path('recentmatches/', views.get_matches_list, name='recent_match'),
+    path('matches/', MatchesList.as_view(), name='matches'),
 ]
