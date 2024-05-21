@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 class Matches(models.Model):
     match_id = models.CharField(null=True,max_length=100)
@@ -10,9 +11,10 @@ class Matches(models.Model):
     flag1 = models.ImageField(upload_to='images/', null=True, default=None)
     flag2 = models.ImageField(upload_to='images/', null=True, default=None)
     match_description = models.CharField(max_length=255)
-    status = models.CharField(max_length=100)
+    status = models.CharField(null=True,max_length=100)
     venue = models.CharField( max_length=100)
     state = models.CharField(max_length=50)
+    start_date = models.DateTimeField(_("Start Date"), null=True, blank=True)
    
 
     def __str__(self):
