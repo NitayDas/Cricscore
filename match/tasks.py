@@ -4,6 +4,8 @@ import requests
 import datetime
 from django.utils.timezone import make_aware
 
+
+# Storing MacthesList
 def Store_And_Update_Matches(api_url, headers):
     from .models import Matches
     
@@ -59,8 +61,48 @@ def Store_And_Update_Matches(api_url, headers):
 
     except requests.RequestException as e:
         print(f'Failed to fetch matches from API: {api_url}, Error: {e}')
-
-
+        
+        
+# Storing OverSummary
+def store_oversummary(oversummary_url, headers):
+    from .models import Matches,OverSummary
+    
+    headers = {
+        'X-RapidAPI-Key': 'b75aac835cmshaa98b93c54be468p128cc8jsn66c9ac71b9e8',
+        'X-RapidAPI-Host': 'cricbuzz-cricket.p.rapidapi.com'
+    }
+    
+    try:
+        response= requests.get(oversummary_url, headers=headers)
+        response.raise_for_status()
+        
+        if response.status_code == 200:
+            data = response.json()
+            match_id = data.get('matchHeader', {}).get('matchId')
+            commentary_list = data.get('commentaryList', [])
+            match = Matches.objects.filter(match_id=match_id).first()
+            match.innings_id = data.get('miniscore', {}).get('inningsId')
+            match.save()
+            
+            
+            for commentary in commentary_list:
+                OverSummary.objects.create(
+                match_id = match_id,
+                InningsId=str(commentary.get('inningsId', '')),
+                OverNum=str(commentary.get('overNumber', '')),
+                Event=commentary.get('event', ''),
+                commentary=commentary.get('commText', '')
+                )
+                    
+            
+    except requests.RequestException as e:
+        print(f'Failed to fetch oversummary from api: {oversummary_url}, Error: {e}')
+    
+    
+    
+    
+    
+    
 
 @shared_task(bind=True)
 def fetch_matches_from_api(self):
@@ -80,3 +122,26 @@ def fetch_matches_from_api(self):
     # Store_And_Update_Matches(recent_api_url, headers)
     
     return "Done"
+
+
+@shared_task(bind=True)
+def fetch_oversummary(self):
+    headers = {
+        'X-RapidAPI-Key': 'b75aac835cmshaa98b93c54be468p128cc8jsn66c9ac71b9e8',
+        'X-RapidAPI-Host': 'cricbuzz-cricket.p.rapidapi.com'
+    }
+    
+    from .models import Matches
+    
+    matches = Matches.objects.exclude(state = 'Upcoming').exclude(state = 'Complete')
+    
+    for match in Matches:
+        oversummary_url= f'https://cricbuzz-cricket.p.rapidapi.com/mcenter/v1/{match.match_id}/comm'
+        store_oversummary(oversummary_url,headers)
+        
+    return "Done"
+
+    
+    
+     
+     

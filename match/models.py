@@ -15,7 +15,23 @@ class Matches(models.Model):
     venue = models.CharField( max_length=100)
     state = models.CharField(max_length=50)
     start_date = models.DateTimeField(_("Start Date"), null=True, blank=True)
+    innings_id = models.CharField(max_length=10,null=True,default=1)
    
 
     def __str__(self):
         return f"{self.match_description} ({self.match_id})"
+
+
+class OverSummary(models.Model):
+    match_id = models.CharField(null=True,max_length=100)
+    InningsId = models.CharField(null=True,max_length=100)
+    OverNum = models.CharField(null=True,max_length=100)
+    Event = models.CharField(null=True,max_length=100)
+    commentary = models.CharField(null=True,max_length=3000)
+    
+    
+    def __str__(self):
+        return f"{self.match_id}-{self.InningsId}-({self.OverNum})"
+    
+    
+    
