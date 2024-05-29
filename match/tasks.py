@@ -65,12 +65,7 @@ def Store_And_Update_Matches(api_url, headers):
         
 # Storing OverSummary
 def store_oversummary(oversummary_url, headers):
-    from .models import Matches,OverSummary
-    
-    headers = {
-        'X-RapidAPI-Key': 'b75aac835cmshaa98b93c54be468p128cc8jsn66c9ac71b9e8',
-        'X-RapidAPI-Host': 'cricbuzz-cricket.p.rapidapi.com'
-    }
+    from .models import Matches,OverSummary,Scoreboard
     
     try:
         response= requests.get(oversummary_url, headers=headers)
@@ -78,20 +73,60 @@ def store_oversummary(oversummary_url, headers):
         
         if response.status_code == 200:
             data = response.json()
-            match_id = data.get('matchHeader', {}).get('matchId')
+            matchHeader = data.get('matchHeader', {})
+            match_id = matchHeader.get('matchId')
+            state = matchHeader.get('state')
             commentary_list = data.get('commentaryList', [])
+            
             match = Matches.objects.filter(match_id=match_id).first()
-            match.innings_id = data.get('miniscore', {}).get('inningsId')
+            
+            miniscore = data.get("miniscore", {})
+            match_score_details = miniscore.get("matchScoreDetails", {})
+            innings_score_list = match_score_details.get("inningsScoreList", [])
+            
+            match.innings_id =str(miniscore.get('inningsId') or '1')
+            match.state = state
             match.save()
             
             
+            # Update Scoreboard fields
+            for innings in innings_score_list:
+                inningsId = str(innings.get("inningsId") or '1')
+                bat_team_name = innings.get('batTeamName')
+                score = innings.get("score", 0)
+                overs = innings.get("overs", 0)
+                wickets = innings.get("wickets", 0)
+                
+                
+                scoreboard, created = Scoreboard.objects.update_or_create(
+                        match=match,
+                        inningsId=inningsId,
+                        defaults={
+                            'bat_team': bat_team_name,
+                            'score': score,
+                            'wickets': wickets,
+                            'overs': overs,
+                        }
+                    )
+                    
+                    
+    
+            previous = '0'
             for commentary in commentary_list:
-                OverSummary.objects.create(
-                match_id = match_id,
-                InningsId=str(commentary.get('inningsId', '')),
-                OverNum=str(commentary.get('overNumber', '')),
-                Event=commentary.get('event', ''),
-                commentary=commentary.get('commText', '')
+                innings_id = str(commentary.get('inningsId') or '1')
+                over_num = str(commentary.get('overNumber') or previous)
+                event = commentary.get('event', '')
+                comm_text = commentary.get('commText', '')
+                previous = over_num
+
+                OverSummary.objects.get_or_create(
+                    match_id=match_id,
+                    InningsId=innings_id,
+                    OverNum=over_num,
+                    commentary=comm_text,
+                    defaults={
+                        'Event': event,
+                    }
                 )
                     
             
@@ -118,24 +153,25 @@ def fetch_matches_from_api(self):
     live_api_url = 'https://cricbuzz-cricket.p.rapidapi.com/matches/v1/live'
     Store_And_Update_Matches(live_api_url, headers)
     
-    # recent_api_url = 'https://cricbuzz-cricket.p.rapidapi.com/matches/v1/recent'
-    # Store_And_Update_Matches(recent_api_url, headers)
+    recent_api_url = 'https://cricbuzz-cricket.p.rapidapi.com/matches/v1/recent'
+    Store_And_Update_Matches(recent_api_url, headers)
     
     return "Done"
 
 
 @shared_task(bind=True)
 def fetch_oversummary(self):
-    headers = {
-        'X-RapidAPI-Key': 'b75aac835cmshaa98b93c54be468p128cc8jsn66c9ac71b9e8',
-        'X-RapidAPI-Host': 'cricbuzz-cricket.p.rapidapi.com'
-    }
-    
     from .models import Matches
+    
+    # Niloy Das
+    headers = {
+        "x-rapidapi-key": "2c9bb38fd1msh7f2cfcda4cf807ep11c91ajsn7e28e3ba076e",
+        "x-rapidapi-host": "cricbuzz-cricket.p.rapidapi.com"
+    }
     
     matches = Matches.objects.exclude(state = 'Upcoming').exclude(state = 'Complete')
     
-    for match in Matches:
+    for match in matches:
         oversummary_url= f'https://cricbuzz-cricket.p.rapidapi.com/mcenter/v1/{match.match_id}/comm'
         store_oversummary(oversummary_url,headers)
         
