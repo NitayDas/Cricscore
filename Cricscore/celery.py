@@ -16,9 +16,14 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 #celery_beat setting
 
 app.conf.beat_schedule = {
-    'fetch-matches-every-minute': {
+    'fetch-matches-every-2hours': {
         'task': 'match.tasks.fetch_matches_from_api',
-        'schedule': crontab(minute='*/120'),
+        'schedule': crontab(minute='*/2'),
+    },
+    
+    'fetch_oversummary-every-2minute': {
+        'task': 'match.tasks.fetch_oversummary',
+        'schedule': crontab(minute='*/2'),
     },
 }
 

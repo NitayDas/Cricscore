@@ -58,7 +58,7 @@ def home(request):
 class MatchesList(APIView):
     def get(self, request):
         today=timezone.now()
-        five_days_earlier = today - timedelta(days=5)
+        five_days_earlier = today - timedelta(days=7)
         seven_days_later = today + timedelta(days=7)
         matches=Matches.objects.filter(start_date__date__range=(five_days_earlier.date(),seven_days_later.date()))
         serializer = MatchesSerializer(matches,many=True)
@@ -69,7 +69,8 @@ class MatchDetails(APIView):
         print(match_id)
         match = Matches.objects.get(match_id=match_id)
         innings_id = match.innings_id
-        oversummary = OverSummary.objects.filter(match_id='91731',InningsId='2')
+        print(innings_id)
+        oversummary = OverSummary.objects.filter(match_id='match_id',InningsId='innings_id')
         serializer = OverSummarySerializer(oversummary,many=True)
         return Response(serializer.data)
         
