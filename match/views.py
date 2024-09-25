@@ -9,12 +9,42 @@ from .models import *
 from django.utils import timezone
 from datetime import datetime,timedelta
 import requests
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.models import User
+
 
 
 def home(request):
     return render(request, 'Home/home.html')
 
+class RegisterView(APIView):
+    def post(self, request):
+        username = request.data.get('username')
+        email = request.data.get('email')
+        password = request.data.get('password')
+        
+        print(username)
+        
+       
+        if User.objects.filter(email=email).exists():
+            return Response({'error': 'Email already in use'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user = User.objects.create_user(username=username, email=email, password=password)
+        return Response({'message': 'User created successfully!'}, status=status.HTTP_201_CREATED)
 
+class LoginView(APIView):
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+        user = authenticate(username=username, password=password)
+        
+        if user is not None:
+            login(request, user)  # Log in the user (session-based authentication)
+            return Response({'message': 'Login successful!'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+        
 
 class MatchesList(APIView):
     def get(self, request):
@@ -80,3 +110,34 @@ class overSummary_and_Scoreboard(APIView):
         
 
 
+class CommentView(APIView):
+    def get(self, request, over_summary_id):
+        try:
+            over_summary = OverSummary.objects.get(id=over_summary_id)
+            comments = over_summary.comments.all()
+            serializer = CommentSerializer(comments, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        except OverSummary.DoesNotExist:
+            return Response({'error': 'OverSummary not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    def post(self, request, over_summary_id):
+       try:
+            event = OverSummary.objects.get(id=over_summary_id)
+            
+       except OverSummary.DoesNotExist:
+            return Response({'error': 'OverSummary not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+       data = {
+            "event": event.id,  
+            "username": request.data.get("username"),
+            "content": request.data.get("content")
+        }
+
+       serializer = CommentSerializer(data=data)
+       if serializer.is_valid():
+            serializer.save() 
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+       print(serializer.errors)
+       return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

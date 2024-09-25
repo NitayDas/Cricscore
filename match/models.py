@@ -45,4 +45,14 @@ class OverSummary(models.Model):
         return f"{self.match_id}-{self.InningsId}-({self.OverNum})"
     
     
+class Comment(models.Model):
+    event = models.ForeignKey(OverSummary, related_name='comments', on_delete=models.CASCADE)
+    username = models.CharField(max_length=100)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Comment by {self.username} on {self.event}'
+    
+    
     

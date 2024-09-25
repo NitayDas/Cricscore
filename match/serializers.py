@@ -16,4 +16,9 @@ class ScoreboardSerializer(serializers.ModelSerializer):
          model = Scoreboard
          fields = '__all__'
 
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ['id', 'event', 'username', 'content', 'created_at']
+
     
