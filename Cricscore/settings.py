@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -43,6 +44,7 @@ INSTALLED_APPS = [
     'django_celery_beat',
     'match',
     'django_celery_results',
+    
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -79,6 +81,14 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'Cricscore.wsgi.application'
+
+ASGI_APPLICATION = 'Cricscore.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
 
 
 # Database

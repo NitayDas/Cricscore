@@ -1,7 +1,6 @@
 from django.shortcuts import render
 from django.http.response import HttpResponse
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from rest_framework import status
 from .serializers import *
@@ -11,7 +10,9 @@ from datetime import datetime,timedelta
 import requests
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
-
+from django.http import JsonResponse
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes
 
 
 def home(request):
@@ -141,3 +142,13 @@ class CommentView(APIView):
         
        print(serializer.errors)
        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+   
+   
+@api_view(['GET']) 
+def get_current_user(request):
+    user= request.user
+    print(user.username)
+    if user.is_authenticated:
+         return JsonResponse({'username': user.username})
+    else:
+         return JsonResponse({'error': 'User not authenticated'}, status=401)
