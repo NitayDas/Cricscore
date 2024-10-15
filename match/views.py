@@ -50,8 +50,8 @@ class LoginView(APIView):
 class MatchesList(APIView):
     def get(self, request):
         today=timezone.now()
-        five_days_earlier = today - timedelta(days=8)
-        seven_days_later = today + timedelta(days=7)
+        five_days_earlier = today - timedelta(days=10)
+        seven_days_later = today + timedelta(days=10)
         matches=Matches.objects.filter(start_date__date__range=(five_days_earlier.date(),seven_days_later.date()))
         serializer = MatchesSerializer(matches,many=True)
         return Response(serializer.data)

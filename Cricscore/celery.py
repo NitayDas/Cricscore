@@ -23,7 +23,7 @@ app.conf.beat_schedule = {
     
     'fetch_oversummary-every-2minute': {
         'task': 'match.tasks.fetch_oversummary',
-        'schedule': crontab(minute='*/2'),
+        'schedule': crontab(minute='*/1'),
     },
 }
 

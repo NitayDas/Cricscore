@@ -5,6 +5,7 @@ from django.urls import path,include
 from match import views as match_view
 
 urlpatterns = [
+    # path('api/', include('accounts.api.urls')),
     path('api-auth/', include('rest_framework.urls')),
     path('admin/', admin.site.urls),
     path('', include('match.urls')),
