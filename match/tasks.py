@@ -7,7 +7,7 @@ from django.utils.timezone import make_aware
 
 # Storing MacthesList
 def Store_And_Update_Matches(api_url, headers):
-    from .models import Matches
+    from .models import Matches,Series
     
     try:
         response = requests.get(api_url, headers=headers)
@@ -22,7 +22,49 @@ def Store_And_Update_Matches(api_url, headers):
                     continue
 
                 for series_match in match_type['seriesMatches']:
-                    for match_info in series_match.get('seriesAdWrapper', {}).get('matches', []):
+                    matches = series_match.get('seriesAdWrapper', {}).get('matches', [])
+                    series_info = series_match.get('seriesAdWrapper', {})
+                    series_id = series_info.get('seriesId')
+                    series_name = series_info.get('seriesName', 'Unknown Series')
+
+                    # creating seires object
+                    if matches:
+                        first_match_info = matches[0]['matchInfo']
+                        series_start_timestamp = first_match_info.get('seriesStartDt')
+                        series_end_timestamp = first_match_info.get('seriesEndDt')
+                    
+                    
+                    # Convert timestamps to datetime objects
+                    series_start_date = None
+                    series_end_date = None  
+                    if series_start_timestamp:
+                        series_start_date = make_aware(
+                            datetime.datetime.fromtimestamp(int(series_start_timestamp) / 1000.0)
+                        )
+                    if series_end_timestamp:
+                        series_end_date = make_aware(
+                            datetime.datetime.fromtimestamp(int(series_end_timestamp) / 1000.0)
+                        )
+                        
+                    print(series_id,series_name,series_start_date,series_end_date) 
+                    series_obj = None
+                    if series_id:
+                        series_obj, created = Series.objects.get_or_create(
+                            series_id=series_id,
+                            defaults={
+                                'series_name': series_name,
+                                'start_date': series_start_date,
+                                'end_date': series_end_date,
+                            }
+                        )
+                        
+                        if created:
+                            print(f"Created new Series: {series_obj.series_id}, {series_obj.series_name}")
+                        else:
+                            print(f"Series already exists: {series_obj.series_id}, {series_obj.series_name}")
+                
+                    
+                    for match_info in matches:
                         
                         match_id = match_info['matchInfo']['matchId']
                         existing_match = Matches.objects.filter(match_id=match_id).first()
@@ -34,14 +76,14 @@ def Store_And_Update_Matches(api_url, headers):
                                 start_date = make_aware(datetime.datetime.fromtimestamp(int(start_timestamp) / 1000.0))
                             except ValueError:
                                 print(f"Invalid timestamp: {start_timestamp}")
-                                    
+                                
+                              
                         if not existing_match:
-                            
                             Matches.objects.create(
                                 match_id=match_info['matchInfo']['matchId'],
-                                series_id=match_info['matchInfo']['seriesId'],
+                                series = series_obj if series_obj else None,
                                 match_type=match_type['matchType'],
-                                series_name=match_info['matchInfo']['seriesName'],
+                                series_name=series_name,
                                 team1=match_info['matchInfo']['team1']['teamName'],
                                 team2=match_info['matchInfo']['team2']['teamName'],
                                 match_description=match_info['matchInfo']['matchDesc'],
@@ -146,7 +188,6 @@ def fetch_matches_from_api(self):
         'X-RapidAPI-Key': 'b75aac835cmshaa98b93c54be468p128cc8jsn66c9ac71b9e8',
         'X-RapidAPI-Host': 'cricbuzz-cricket.p.rapidapi.com'
     }
-    
     upcoming_api_url = 'https://cricbuzz-cricket.p.rapidapi.com/matches/v1/upcoming'
     Store_And_Update_Matches(upcoming_api_url, headers)
     

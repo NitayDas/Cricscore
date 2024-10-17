@@ -1,6 +1,12 @@
 from rest_framework import serializers
 from .models import *
 
+
+class SeriesSerializer(serializers.ModelSerializer):
+    class Meta: 
+        model = Series
+        fields = '__all__'
+        
 class MatchesSerializer(serializers.ModelSerializer):
     class Meta: 
         model = Matches

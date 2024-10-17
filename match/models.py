@@ -1,9 +1,19 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+
+class Series(models.Model):
+    series_id = models.CharField(max_length=100, unique=True)
+    series_name = models.CharField(max_length=255)
+    start_date = models.DateTimeField(null=True, blank=True)  
+    end_date = models.DateTimeField(null=True, blank=True) 
+   
+    def __str__(self):
+        return self.series_name
+
 class Matches(models.Model):
+    series = models.ForeignKey(Series, related_name='matches', on_delete=models.CASCADE, null=True, blank=True)
     match_id = models.CharField(null=True,max_length=100)
-    series_id = models.CharField(null=True,max_length=100)
     match_type = models.CharField(max_length=50)
     series_name= models.CharField(max_length=255)
     team1 = models.CharField(max_length=50)
@@ -53,6 +63,9 @@ class Comment(models.Model):
 
     def __str__(self):
         return f'Comment by {self.username} on {self.event}'
+
+
+    
     
     
     
