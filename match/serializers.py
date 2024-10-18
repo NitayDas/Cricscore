@@ -7,6 +7,11 @@ class SeriesSerializer(serializers.ModelSerializer):
         model = Series
         fields = '__all__'
         
+class SeriesMatchesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Matches
+        fields = '__all__'   
+          
 class MatchesSerializer(serializers.ModelSerializer):
     class Meta: 
         model = Matches

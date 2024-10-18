@@ -12,7 +12,7 @@ class Series(models.Model):
         return self.series_name
 
 class Matches(models.Model):
-    series = models.ForeignKey(Series, related_name='matches', on_delete=models.CASCADE, null=True, blank=True)
+    series = models.ForeignKey(Series, related_name='match', on_delete=models.CASCADE, null=True, blank=True)
     match_id = models.CharField(null=True,max_length=100)
     match_type = models.CharField(max_length=50)
     series_name= models.CharField(max_length=255)

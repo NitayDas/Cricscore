@@ -46,13 +46,21 @@ class LoginView(APIView):
         else:
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
         
-class Series(APIView):
+class SeriesList(APIView):
     def get(self, request):
         today=timezone.now()
-        five_days_earlier = today - timedelta(days=10)
-        seven_days_later = today + timedelta(days=10)
-        series=Series.objects.filter(start_date__date__range=(five_days_earlier.date(),seven_days_later.date()))
+        thirty_days_earlier = today - timedelta(days=30)
+        Thirty_days_later = today + timedelta(days=30)
+        series=Series.objects.filter(start_date__date__range=(thirty_days_earlier.date(),Thirty_days_later.date())).order_by('-start_date') 
         serializer = SeriesSerializer(series,many=True)
+        return Response(serializer.data)
+    
+    
+class SeriesMatchesList(APIView):
+    def get(self, request, seriesId):
+        series = Series.objects.get(series_id = seriesId)
+        matches = Matches.objects.filter(series=series)
+        serializer = SeriesMatchesSerializer(matches,many=True)
         return Response(serializer.data)
         
     
