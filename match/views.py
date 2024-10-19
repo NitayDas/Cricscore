@@ -121,7 +121,8 @@ class overSummary_and_Scoreboard(APIView):
         # Combine all serialized data into one response
         response_data = {
             "scoreboard": scoreboard_serializer.data,
-            "oversummary": oversummary_serializer.data
+            "oversummary": oversummary_serializer.data,
+            "match_info": f"{match.status} --- {match.series_name}",
         }
         
         return Response(response_data, status=status.HTTP_200_OK)
