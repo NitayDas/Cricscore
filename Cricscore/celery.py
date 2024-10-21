@@ -2,6 +2,7 @@ import os
 from celery import Celery
 from celery.schedules import crontab
 from match import tasks
+from datetime import timedelta
 
 # Set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Cricscore.settings')
@@ -18,12 +19,13 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 app.conf.beat_schedule = {
     'fetch-matches-every-2hours': {
         'task': 'match.tasks.fetch_matches_from_api',
-        'schedule': crontab(minute='*/2'),
+        'schedule': crontab(minute='*/10'),
     },
     
     'fetch_oversummary-every-2minute': {
         'task': 'match.tasks.fetch_oversummary',
-        'schedule': crontab(minute='*/1'),
+        # 'schedule': crontab(minute='*/0.5'),
+        'schedule': timedelta(seconds=30), 
     },
 }
 

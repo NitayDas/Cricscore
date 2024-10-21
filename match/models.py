@@ -57,6 +57,7 @@ class OverSummary(models.Model):
     
 class Comment(models.Model):
     event = models.ForeignKey(OverSummary, related_name='comments', on_delete=models.CASCADE)
+    parent = models.ForeignKey('self', null=True, blank=True, related_name='replies', on_delete=models.CASCADE)  # For replies
     username = models.CharField(max_length=100)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)

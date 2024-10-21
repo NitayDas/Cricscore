@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http.response import HttpResponse
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import status
+from rest_framework import status,generics
 from .serializers import *
 from .models import *
 from django.utils import timezone
@@ -59,7 +59,7 @@ class SeriesList(APIView):
 class SeriesMatchesList(APIView):
     def get(self, request, seriesId):
         series = Series.objects.get(series_id = seriesId)
-        matches = Matches.objects.filter(series=series)
+        matches = Matches.objects.filter(series=series).order_by('-start_date') 
         serializer = SeriesMatchesSerializer(matches,many=True)
         return Response(serializer.data)
         
@@ -133,9 +133,10 @@ class CommentView(APIView):
     def get(self, request, over_summary_id):
         try:
             over_summary = OverSummary.objects.get(id=over_summary_id)
-            comments = over_summary.comments.all()
+            comments = over_summary.comments.filter(parent__isnull=True).prefetch_related('replies')
             serializer = CommentSerializer(comments, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
+            
         
         except OverSummary.DoesNotExist:
             return Response({'error': 'OverSummary not found'}, status=status.HTTP_404_NOT_FOUND)
@@ -161,6 +162,28 @@ class CommentView(APIView):
        print(serializer.errors)
        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
    
+   
+
+class ReplyListCreateView(generics.ListCreateAPIView):
+    serializer_class = ReplySerializer
+
+    def get_queryset(self):
+        comment_id = self.kwargs['comment_id']
+        return Comment.objects.filter(parent_id=comment_id).order_by('-created_at')
+
+    def perform_create(self, serializer):
+        comment_id = self.kwargs['comment_id']
+        parent_comment = Comment.objects.get(id=comment_id)
+        
+        reply_content = serializer.validated_data.get('content')  # Reply content
+        username = serializer.validated_data.get('username')      # Username
+
+        # Print the reply content and username
+        print(f"Reply Content: {reply_content}")
+        print(f"Username: {username}")
+        serializer.save(parent=parent_comment, event=parent_comment.event)   
+        
+        
    
 @api_view(['GET']) 
 def get_current_user(request):

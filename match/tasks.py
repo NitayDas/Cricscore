@@ -46,7 +46,7 @@ def Store_And_Update_Matches(api_url, headers):
                             datetime.datetime.fromtimestamp(int(series_end_timestamp) / 1000.0)
                         )
                         
-                    print(series_id,series_name,series_start_date,series_end_date) 
+                    # print(series_id,series_name,series_start_date,series_end_date) 
                     series_obj = None
                     if series_id:
                         series_obj, created = Series.objects.get_or_create(
@@ -210,12 +210,12 @@ def fetch_oversummary(self):
         "x-rapidapi-host": "cricbuzz-cricket.p.rapidapi.com"
     }
     
-    matches = Matches.objects.exclude(state = 'Upcoming').exclude(state = 'Complete')
+    matches = Matches.objects.exclude(state = 'Upcoming').exclude(state = 'Complete').exclude(match_type = 'League')
     
     for match in matches:
         oversummary_url= f'https://cricbuzz-cricket.p.rapidapi.com/mcenter/v1/{match.match_id}/comm'
         store_oversummary(oversummary_url,headers)
-        
+    
     return "Done"
 
     

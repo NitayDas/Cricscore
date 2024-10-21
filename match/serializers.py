@@ -27,9 +27,16 @@ class ScoreboardSerializer(serializers.ModelSerializer):
          model = Scoreboard
          fields = '__all__'
 
-class CommentSerializer(serializers.ModelSerializer):
+
+class ReplySerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        fields = ['id', 'event', 'username', 'content', 'created_at']
+        fields = ['id', 'username', 'content', 'created_at']
+        
+class CommentSerializer(serializers.ModelSerializer):
+    replies = ReplySerializer(many=True, read_only=True) 
+    class Meta:
+        model = Comment
+        fields = ['id', 'event', 'username', 'content', 'created_at', 'replies']
 
     

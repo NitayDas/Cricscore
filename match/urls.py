@@ -13,5 +13,6 @@ urlpatterns = [
     path('register/',RegisterView.as_view(), name='register'),
     path('login/', LoginView.as_view(),name='login'),
     path('comments/<int:over_summary_id>/', CommentView.as_view()),
+    path('comments/<int:comment_id>/replies/', ReplyListCreateView.as_view(), name='reply-list-create'),
     path('finduser/', views.get_current_user, name = 'user'),
 ]
