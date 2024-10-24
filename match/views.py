@@ -11,7 +11,7 @@ import requests
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.http import JsonResponse
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
 
 
@@ -47,6 +47,7 @@ class LoginView(APIView):
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
         
 class SeriesList(APIView):
+    permission_classes = [AllowAny]
     def get(self, request):
         today=timezone.now()
         thirty_days_earlier = today - timedelta(days=30)
@@ -57,6 +58,7 @@ class SeriesList(APIView):
     
     
 class SeriesMatchesList(APIView):
+    permission_classes = [AllowAny]
     def get(self, request, seriesId):
         series = Series.objects.get(series_id = seriesId)
         matches = Matches.objects.filter(series=series).order_by('-start_date') 
@@ -65,6 +67,7 @@ class SeriesMatchesList(APIView):
         
     
 class MatchesList(APIView):
+    permission_classes = [AllowAny]
     def get(self, request):
         today=timezone.now()
         five_days_earlier = today - timedelta(days=10)
@@ -102,6 +105,7 @@ class MatchesList(APIView):
         
     
 class overSummary_and_Scoreboard(APIView):
+    permission_classes = [AllowAny]
     def get(self, request, match_id):
         
         try:
@@ -130,6 +134,7 @@ class overSummary_and_Scoreboard(APIView):
 
 
 class CommentView(APIView):
+    permission_classes = [AllowAny]
     def get(self, request, over_summary_id):
         try:
             over_summary = OverSummary.objects.get(id=over_summary_id)
@@ -148,10 +153,15 @@ class CommentView(APIView):
        except OverSummary.DoesNotExist:
             return Response({'error': 'OverSummary not found.'}, status=status.HTTP_404_NOT_FOUND)
 
+       parent_id = request.data.get("parent")
+       
+       
        data = {
             "event": event.id,  
-            "username": request.data.get("username"),
-            "content": request.data.get("content")
+            "user": request.data.get("user"),
+            "content": request.data.get("content"),
+            "parent": parent_id if parent_id else None,
+            
         }
 
        serializer = CommentSerializer(data=data)
@@ -164,24 +174,25 @@ class CommentView(APIView):
    
    
 
-class ReplyListCreateView(generics.ListCreateAPIView):
-    serializer_class = ReplySerializer
+# class ReplyListCreateView(generics.ListCreateAPIView):
+    # pass
+#     serializer_class = ReplySerializer
 
-    def get_queryset(self):
-        comment_id = self.kwargs['comment_id']
-        return Comment.objects.filter(parent_id=comment_id).order_by('-created_at')
+#     def get_queryset(self):
+#         comment_id = self.kwargs['comment_id']
+#         return Comment.objects.filter(parent_id=comment_id).order_by('-created_at')
 
-    def perform_create(self, serializer):
-        comment_id = self.kwargs['comment_id']
-        parent_comment = Comment.objects.get(id=comment_id)
+#     def perform_create(self, serializer):
+#         comment_id = self.kwargs['comment_id']
+#         parent_comment = Comment.objects.get(id=comment_id)
         
-        reply_content = serializer.validated_data.get('content')  # Reply content
-        username = serializer.validated_data.get('username')      # Username
+#         reply_content = serializer.validated_data.get('content')  # Reply content
+#         username = serializer.validated_data.get('username')      # Username
 
-        # Print the reply content and username
-        print(f"Reply Content: {reply_content}")
-        print(f"Username: {username}")
-        serializer.save(parent=parent_comment, event=parent_comment.event)   
+#         # Print the reply content and username
+#         print(f"Reply Content: {reply_content}")
+#         print(f"Username: {username}")
+#         serializer.save(parent=parent_comment, event=parent_comment.event)   
         
         
    

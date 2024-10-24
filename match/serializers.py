@@ -28,15 +28,31 @@ class ScoreboardSerializer(serializers.ModelSerializer):
          fields = '__all__'
 
 
-class ReplySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Comment
-        fields = ['id', 'username', 'content', 'created_at']
         
 class CommentSerializer(serializers.ModelSerializer):
-    replies = ReplySerializer(many=True, read_only=True) 
+    replies = serializers.SerializerMethodField()  # Fetch replies recursively
+    parent_user = serializers.SerializerMethodField()  # Include parent user in the reply
+
     class Meta:
         model = Comment
-        fields = ['id', 'event', 'username', 'content', 'created_at', 'replies']
+        fields = ['id','event','parent' ,'user', 'content', 'created_at', 'replies', 'parent_user']
 
+    def get_replies(self, obj):
+        replies = obj.replies.all()
+        if replies.exists():
+            serializer = CommentSerializer(replies, many=True, context=self.context)
+            for item in serializer.data:
+                item.pop('event')  
+                item.pop('parent') 
+            return serializer.data
+        return None
+
+    def get_parent_user(self, obj):
+        # Fetch the parent user's details if a parent comment exists
+        if obj.parent and obj.parent.user:
+            return {
+                'name': obj.parent.user.get('name'),
+                'email': obj.parent.user.get('email')
+            }
+        return None
     
