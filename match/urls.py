@@ -11,5 +11,7 @@ urlpatterns = [
     path('register/',RegisterView.as_view(), name='register'),
     path('login/', LoginView.as_view(),name='login'),
     path('comments/<int:over_summary_id>/', CommentView.as_view()),
+    path('comments/like/<int:comment_id>/',LikeCommentView.as_view(), name='like'),
     path('finduser/', views.get_current_user, name = 'user'),
+     path('top-comments/', GetTopComments.as_view(), name='top-comments'),
 ]

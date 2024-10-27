@@ -174,28 +174,41 @@ class CommentView(APIView):
    
    
 
-# class ReplyListCreateView(generics.ListCreateAPIView):
-    # pass
-#     serializer_class = ReplySerializer
+class LikeCommentView(APIView):
+    permission_classes = [AllowAny]  
 
-#     def get_queryset(self):
-#         comment_id = self.kwargs['comment_id']
-#         return Comment.objects.filter(parent_id=comment_id).order_by('-created_at')
+    def post(self, request, comment_id):
+        user_email = request.data.get('user_email') 
+        
+        if not user_email:
+            return Response({'error': 'User email not provided'}, status=status.HTTP_400_BAD_REQUEST)
 
-#     def perform_create(self, serializer):
-#         comment_id = self.kwargs['comment_id']
-#         parent_comment = Comment.objects.get(id=comment_id)
+        try:
+            comment = Comment.objects.get(id=comment_id)
+            comment.toggle_like(user_email)  
+            return Response({
+                'likes': comment.likes,
+                'liked_by': comment.liked_by,
+                'comment': CommentSerializer(comment).data  
+            }, status=status.HTTP_200_OK)
+            
+        except Comment.DoesNotExist:
+            return Response({'error': 'Comment not found'}, status=status.HTTP_404_NOT_FOUND)
         
-#         reply_content = serializer.validated_data.get('content')  # Reply content
-#         username = serializer.validated_data.get('username')      # Username
+        
+class GetTopComments(APIView):
+    permission_classes = [AllowAny]  
 
-#         # Print the reply content and username
-#         print(f"Reply Content: {reply_content}")
-#         print(f"Username: {username}")
-#         serializer.save(parent=parent_comment, event=parent_comment.event)   
-        
-        
-   
+    def get(self, request):
+        today = timezone.now()
+        Ten_days_earlier = today - timedelta(days=10)
+        comments = Comment.objects.filter(created_at__gte=Ten_days_earlier.date()).order_by('-likes', '-created_at')[:20]
+
+        serializer = topCommentSerializer(comments, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+
 @api_view(['GET']) 
 def get_current_user(request):
     user= request.user

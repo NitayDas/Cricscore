@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.contrib.postgres.fields import ArrayField
 
 
 class Series(models.Model):
@@ -61,9 +62,20 @@ class Comment(models.Model):
     user = models.JSONField(null=True) 
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    likes = models.IntegerField(default=0)
+    liked_by = models.JSONField(default=list)
 
     def __str__(self):
         return f'Comment by {self.user} on {self.event}'
+    
+    def toggle_like(self, user_email):
+        if user_email in self.liked_by:
+            self.liked_by.remove(user_email)
+            self.likes -= 1
+        else:
+            self.liked_by.append(user_email)
+            self.likes += 1
+        self.save()
 
 
     

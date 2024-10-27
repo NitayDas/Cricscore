@@ -35,7 +35,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ['id','event','parent' ,'user', 'content', 'created_at', 'replies', 'parent_user']
+        fields = ['id','event','parent' ,'user', 'content', 'created_at', 'replies', 'parent_user','likes','liked_by']
 
     def get_replies(self, obj):
         replies = obj.replies.all()
@@ -46,6 +46,36 @@ class CommentSerializer(serializers.ModelSerializer):
                 item.pop('parent') 
             return serializer.data
         return None
+    
+    def get_parent_user(self, obj):
+        # Fetch the parent user's details if a parent comment exists
+        if obj.parent and obj.parent.user:
+            return {
+                'name': obj.parent.user.get('name'),
+                'email': obj.parent.user.get('email')
+            }
+        return None
+    
+    
+class topCommentSerializer(serializers.ModelSerializer):
+    match_id = serializers.SerializerMethodField()  # Include match_id
+    over_num = serializers.SerializerMethodField()  # Include over_summary_id
+    parent_user = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Comment
+        fields = [
+            'id',
+            'event',
+            'user',
+            'content',
+            'created_at',
+            'parent_user',
+            'likes',
+            'liked_by',
+            'match_id',  
+            'over_num', 
+        ]
 
     def get_parent_user(self, obj):
         # Fetch the parent user's details if a parent comment exists
@@ -55,4 +85,13 @@ class CommentSerializer(serializers.ModelSerializer):
                 'email': obj.parent.user.get('email')
             }
         return None
+
+    def get_match_id(self, obj):
+        if hasattr(obj.event, 'match_id'):
+            return obj.event.match_id
+        return None
+
+    def get_over_num(self, obj):
+        return obj.event.OverNum if obj.event else None
+
     

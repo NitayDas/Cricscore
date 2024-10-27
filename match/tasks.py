@@ -184,10 +184,26 @@ def store_oversummary(oversummary_url, headers):
 @shared_task(bind=True)
 def fetch_matches_from_api(self):
     
+    # Niloy Das
+    # headers = {
+    #     "x-rapidapi-key": "2c9bb38fd1msh7f2cfcda4cf807ep11c91ajsn7e28e3ba076e",
+    #     "x-rapidapi-host": "cricbuzz-cricket.p.rapidapi.com"
+    # }
+    
+    # headers = {
+    #     'X-RapidAPI-Key': 'b75aac835cmshaa98b93c54be468p128cc8jsn66c9ac71b9e8',
+    #     'X-RapidAPI-Host': 'cricbuzz-cricket.p.rapidapi.com'
+    # }
+    
+    # srijon
     headers = {
-        'X-RapidAPI-Key': 'b75aac835cmshaa98b93c54be468p128cc8jsn66c9ac71b9e8',
-        'X-RapidAPI-Host': 'cricbuzz-cricket.p.rapidapi.com'
+    'x-rapidapi-key': "b26e37462cmshe185bdd3da287b2p1d13c7jsn4894941c8da9",
+    'x-rapidapi-host': "cricbuzz-cricket.p.rapidapi.com"
     }
+    
+
+    
+    
     upcoming_api_url = 'https://cricbuzz-cricket.p.rapidapi.com/matches/v1/upcoming'
     Store_And_Update_Matches(upcoming_api_url, headers)
     
@@ -204,13 +220,14 @@ def fetch_matches_from_api(self):
 def fetch_oversummary(self):
     from .models import Matches
     
-    # Niloy Das
+   
+    #srijon
     headers = {
-        "x-rapidapi-key": "2c9bb38fd1msh7f2cfcda4cf807ep11c91ajsn7e28e3ba076e",
-        "x-rapidapi-host": "cricbuzz-cricket.p.rapidapi.com"
+    'x-rapidapi-key': "b26e37462cmshe185bdd3da287b2p1d13c7jsn4894941c8da9",
+    'x-rapidapi-host': "cricbuzz-cricket.p.rapidapi.com"
     }
     
-    matches = Matches.objects.exclude(state = 'Upcoming').exclude(state = 'Complete').exclude(match_type = 'League')
+    matches = Matches.objects.exclude(state = 'Upcoming').exclude(state = 'Complete').exclude(match_type = 'League').exclude(match_type = 'Domestic')
     
     for match in matches:
         oversummary_url= f'https://cricbuzz-cricket.p.rapidapi.com/mcenter/v1/{match.match_id}/comm'
