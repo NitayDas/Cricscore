@@ -13,5 +13,6 @@ urlpatterns = [
     path('comments/<int:over_summary_id>/', CommentView.as_view()),
     path('comments/like/<int:comment_id>/',LikeCommentView.as_view(), name='like'),
     path('finduser/', views.get_current_user, name = 'user'),
-     path('top-comments/', GetTopComments.as_view(), name='top-comments'),
+    path('top-comments/', GetTopComments.as_view(), name='top-comments'),
+    path('recent-comments/', GetRecentComments.as_view(), name='recent-comments'),
 ]

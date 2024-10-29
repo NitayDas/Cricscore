@@ -201,8 +201,19 @@ class GetTopComments(APIView):
 
     def get(self, request):
         today = timezone.now()
-        Ten_days_earlier = today - timedelta(days=10)
+        Ten_days_earlier = today - timedelta(days=9)
         comments = Comment.objects.filter(created_at__gte=Ten_days_earlier.date()).order_by('-likes', '-created_at')[:20]
+
+        serializer = topCommentSerializer(comments, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class GetRecentComments(APIView):
+    permission_classes = [AllowAny]
+    def get(self, request):
+        today = timezone.now()
+        Ten_days_earlier = today - timedelta(days=9)
+        comments = Comment.objects.filter(created_at__gte=Ten_days_earlier.date()).order_by('-created_at')[:25]
 
         serializer = topCommentSerializer(comments, many=True)
 
