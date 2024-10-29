@@ -60,7 +60,9 @@ class CommentSerializer(serializers.ModelSerializer):
 class topCommentSerializer(serializers.ModelSerializer):
     match_id = serializers.SerializerMethodField()  # Include match_id
     over_num = serializers.SerializerMethodField()  # Include over_summary_id
+    InningsId = serializers.SerializerMethodField()
     parent_user = serializers.SerializerMethodField()
+    
 
     class Meta:
         model = Comment
@@ -73,7 +75,8 @@ class topCommentSerializer(serializers.ModelSerializer):
             'parent_user',
             'likes',
             'liked_by',
-            'match_id',  
+            'match_id', 
+            'InningsId',
             'over_num', 
         ]
 
@@ -93,5 +96,8 @@ class topCommentSerializer(serializers.ModelSerializer):
 
     def get_over_num(self, obj):
         return obj.event.OverNum if obj.event else None
+    
+    def get_InningsId(self, obj):
+        return obj.event.InningsId if obj.event else None
 
     

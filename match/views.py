@@ -110,6 +110,7 @@ class overSummary_and_Scoreboard(APIView):
         
         try:
              match = Matches.objects.get(match_id=match_id)
+             innings_id = request.data.get('innings_id') 
              
         except Matches.DoesNotExist:
             return Response({"error": "Match not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -119,7 +120,8 @@ class overSummary_and_Scoreboard(APIView):
         scoreboard_serializer = ScoreboardSerializer(scoreboard, many=True)
         
         # Fetch and serialize over summary data
-        oversummary = OverSummary.objects.filter(match_id=match_id, InningsId=match.innings_id)
+        innings_id = innings_id if innings_id else match.innings_id
+        oversummary = OverSummary.objects.filter(match_id=match_id, InningsId = innings_id)
         oversummary_serializer = OverSummarySerializer(oversummary, many=True)
         
         # Combine all serialized data into one response
