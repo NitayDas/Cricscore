@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.contrib.postgres.fields import ArrayField
+from django.contrib.postgres.fields import JSONField
 
 
 class Series(models.Model):
@@ -47,13 +48,24 @@ class Scoreboard(models.Model):
 class OverSummary(models.Model):
     match_id = models.CharField(null=True,max_length=100)
     InningsId = models.CharField(max_length=100,default=1)
-    OverNum = models.CharField(null=True,max_length=100)
+    OverNum = models.FloatField(null=True,max_length=100)
     Event = models.CharField(null=True,max_length=100)
-    commentary = models.CharField(null=True,max_length=3000)
+    commentary = models.CharField(null=True,max_length=10000)
     
     
     def __str__(self):
         return f"{self.match_id}-{self.InningsId}-({self.OverNum})"
+    
+class BallByBall(models.Model):
+    match = models.OneToOneField(Matches, on_delete=models.CASCADE, related_name="current_ball_by_ball")
+    batsman_striker = models.JSONField() 
+    batsman_non_striker = models.JSONField()  
+    bowler_striker = models.JSONField() 
+    bowler_non_striker = models.JSONField()  
+    cur_overs_stats = models.TextField() 
+    
+    def __str__(self):
+        return f"Current Ball-by-Ball for Match: {self.match.id}"
     
     
 class Comment(models.Model):
@@ -76,6 +88,28 @@ class Comment(models.Model):
             self.liked_by.append(user_email)
             self.likes += 1
         self.save()
+        
+  
+class CoverImage(models.Model):
+    id = models.IntegerField(primary_key=True)
+    caption = models.TextField()
+    
+    def __str__(self):
+        return self.caption
+          
+class Story(models.Model):
+    story_id = models.IntegerField(primary_key=True) 
+    headline = models.CharField(max_length=255) 
+    intro = models.TextField() 
+    pub_time = models.DateTimeField() 
+    source = models.CharField(max_length=100)
+    story_type = models.CharField(max_length=50)
+    image_id = models.IntegerField()
+    context = models.CharField(max_length=50) 
+    # cover_image = models.ForeignKey(CoverImage, null=True, blank=True, on_delete=models.SET_NULL)
+
+    def __str__(self):
+        return self.headline
 
 
     

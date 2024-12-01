@@ -99,5 +99,9 @@ class topCommentSerializer(serializers.ModelSerializer):
     
     def get_InningsId(self, obj):
         return obj.event.InningsId if obj.event else None
-
     
+
+class NewsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Story
+        fields = '__all__'   

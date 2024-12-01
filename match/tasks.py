@@ -3,7 +3,7 @@ from rest_framework.response import Response
 import requests
 import datetime
 from django.utils.timezone import make_aware
-
+import math
 
 # Storing MacthesList
 def Store_And_Update_Matches(api_url, headers):
@@ -59,9 +59,9 @@ def Store_And_Update_Matches(api_url, headers):
                         )
                         
                         if created:
-                            print(f"Created new Series: {series_obj.series_id}, {series_obj.series_name}")
+                            print(f"Created new Series")
                         else:
-                            print(f"Series already exists: {series_obj.series_id}, {series_obj.series_name}")
+                            print(f"Series already exists")
                 
                     
                     for match_info in matches:
@@ -153,13 +153,16 @@ def store_oversummary(oversummary_url, headers):
                     
                     
     
-            previous = '0'
+            previous = 0.0
             for commentary in commentary_list:
                 innings_id = str(commentary.get('inningsId') or '1')
-                over_num = str(commentary.get('overNumber') or previous)
+                over_num = commentary.get('overNumber') or previous
                 event = commentary.get('event', '')
                 comm_text = commentary.get('commText', '')
-                previous = over_num
+                previous = over_num+0.01
+                
+                if abs(over_num % 1 - 0.6) < 0.001:
+                    over_num = math.ceil(over_num)
 
                 OverSummary.objects.get_or_create(
                     match_id=match_id,
@@ -183,23 +186,23 @@ def store_oversummary(oversummary_url, headers):
 
 @shared_task(bind=True)
 def fetch_matches_from_api(self):
-    
     # Niloy Das
     # headers = {
     #     "x-rapidapi-key": "2c9bb38fd1msh7f2cfcda4cf807ep11c91ajsn7e28e3ba076e",
     #     "x-rapidapi-host": "cricbuzz-cricket.p.rapidapi.com"
     # }
     
-    # headers = {
-    #     'X-RapidAPI-Key': 'b75aac835cmshaa98b93c54be468p128cc8jsn66c9ac71b9e8',
-    #     'X-RapidAPI-Host': 'cricbuzz-cricket.p.rapidapi.com'
-    # }
+    # Nitay
+    headers = {
+        'X-RapidAPI-Key': 'b75aac835cmshaa98b93c54be468p128cc8jsn66c9ac71b9e8',
+        'X-RapidAPI-Host': 'cricbuzz-cricket.p.rapidapi.com'
+    }
     
     # srijon
-    headers = {
-    'x-rapidapi-key': "b26e37462cmshe185bdd3da287b2p1d13c7jsn4894941c8da9",
-    'x-rapidapi-host': "cricbuzz-cricket.p.rapidapi.com"
-    }
+    # headers = {
+    # 'x-rapidapi-key': "b26e37462cmshe185bdd3da287b2p1d13c7jsn4894941c8da9",
+    # 'x-rapidapi-host': "cricbuzz-cricket.p.rapidapi.com"
+    # }
     
 
     

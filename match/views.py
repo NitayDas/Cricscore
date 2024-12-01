@@ -13,6 +13,7 @@ from django.contrib.auth.models import User
 from django.http import JsonResponse
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
+import re
 
 
 def home(request):
@@ -134,6 +135,11 @@ class overSummary_and_Scoreboard(APIView):
         return Response(response_data, status=status.HTTP_200_OK)
         
 
+def filter_slang_words(content, slang_words):
+    # Create a single regex pattern that matches any slang word in the list
+    pattern = r'\b(' + '|'.join(map(re.escape, slang_words)) + r')\b'
+    return re.sub(pattern, '***', content, flags=re.IGNORECASE)
+
 
 class CommentView(APIView):
     permission_classes = [AllowAny]
@@ -157,11 +163,15 @@ class CommentView(APIView):
 
        parent_id = request.data.get("parent")
        
+       # NLP method
+       slang_words = ["shala", "bloody", "stupid", "শালা"]
+       # Filter slang words from the comment content
+       filtered_content = filter_slang_words(request.data.get("content", ""), slang_words)
        
        data = {
             "event": event.id,  
             "user": request.data.get("user"),
-            "content": request.data.get("content"),
+            "content": filtered_content,
             "parent": parent_id if parent_id else None,
             
         }
@@ -221,12 +231,15 @@ class GetRecentComments(APIView):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
     
+    
+class GetNews(APIView):
+    permission_classes = [AllowAny]
+    def get(self, request):
+        today = timezone.now()
+        Five_days_earlier = today - timedelta(days=5)
+        news = Story.objects.filter(pub_time__gte=Five_days_earlier.date()).order_by('pub_time')
+        serializer = NewsSerializer(news, many=True)
 
-@api_view(['GET']) 
-def get_current_user(request):
-    user= request.user
-    print(user.username)
-    if user.is_authenticated:
-         return JsonResponse({'username': user.username})
-    else:
-         return JsonResponse({'error': 'User not authenticated'}, status=401)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+
