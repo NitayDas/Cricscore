@@ -104,4 +104,10 @@ class topCommentSerializer(serializers.ModelSerializer):
 class NewsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Story
-        fields = '__all__'   
+        fields = '__all__'  
+        
+        
+class BallByBallSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BallByBall
+        fields = '__all__' 

@@ -133,7 +133,26 @@ class overSummary_and_Scoreboard(APIView):
         }
         
         return Response(response_data, status=status.HTTP_200_OK)
+    
+
+# return ball by ball striker batsman and bowler info 
+class BallByBall(APIView):
+    permission_classes = [AllowAny]
+    def get(self, request, match_id):
         
+        try:
+            match = Matches.objects.get(match_id=match_id)
+            
+        except Matches.DoesNotExist:
+            return Response({"error": "Match not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+         # Fetch and serialize scoreboard data
+        BallByBall = BallByBall.objects.filter(match=match)
+        BallByBallserializer = BallByBallSerializer(BallByBall, many=True)
+        
+        return Response(BallByBallserializer.data, status=status.HTTP_200_OK)
+    
+    
 
 def filter_slang_words(content, slang_words):
     # Create a single regex pattern that matches any slang word in the list
