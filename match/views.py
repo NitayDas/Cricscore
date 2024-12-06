@@ -136,7 +136,7 @@ class overSummary_and_Scoreboard(APIView):
     
 
 # return ball by ball striker batsman and bowler info 
-class BallByBall(APIView):
+class BallByBallView(APIView):
     permission_classes = [AllowAny]
     def get(self, request, match_id):
         
@@ -147,8 +147,8 @@ class BallByBall(APIView):
             return Response({"error": "Match not found"}, status=status.HTTP_404_NOT_FOUND)
         
          # Fetch and serialize scoreboard data
-        BallByBall = BallByBall.objects.filter(match=match)
-        BallByBallserializer = BallByBallSerializer(BallByBall, many=True)
+        ballByball = BallByBall.objects.filter(match=match)
+        BallByBallserializer = BallByBallSerializer(ballByball, many=True)
         
         return Response(BallByBallserializer.data, status=status.HTTP_200_OK)
     

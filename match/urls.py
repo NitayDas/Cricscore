@@ -13,7 +13,7 @@ urlpatterns = [
     
     path('matchDetails/<str:match_id>/', overSummary_and_Scoreboard.as_view(), name='matchDetails'),
     
-    path('ballByball/<str:match_id>/', BallByBall.as_view(), name='ballByball'),
+    path('ballByball/<str:match_id>/', BallByBallView.as_view(), name='ballByball'),
     
     path('register/',RegisterView.as_view(), name='register'),
     
