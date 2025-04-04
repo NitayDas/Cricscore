@@ -33,7 +33,6 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -42,13 +41,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt',
-    'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
-    'django_celery_beat',
     'match',
-    'django_celery_results',
     'accounts',
-    
+    'django_celery_beat',
+    'django_celery_results',
+    'channels',
 ]
 
 CORS_ALLOWED_ORIGINS = [
