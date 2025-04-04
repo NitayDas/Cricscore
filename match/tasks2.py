@@ -75,15 +75,16 @@ def store_ballByball(api_url, headers, querystring,match_id):
     if response.status_code == 200:
         data = response.json()
         try:
-            
-            print(data)
+            # print(data)
             match = Matches.objects.get(match_id=match_id)
             
-            batsman_striker = data["miniscore"]["batsmanStriker"]
-            batsman_non_striker = data["miniscore"]["batsmanNonStriker"]
-            bowler_striker = data["miniscore"]["bowlerStriker"]
-            bowler_non_striker = data["miniscore"]["bowlerNonStriker"]
-            cur_overs_stats = data["miniscore"]["curOvsStats"]
+            miniscore = data.get("miniscore", {})
+
+            batsman_striker = miniscore.get("batsmanStriker", {})
+            batsman_non_striker = miniscore.get("batsmanNonStriker", {})
+            bowler_striker = miniscore.get("bowlerStriker", {})
+            bowler_non_striker = miniscore.get("bowlerNonStriker", {})
+            cur_overs_stats = miniscore.get("curOvsStats", {})
 
             # Update or create BallByBall data
             BallByBall.objects.update_or_create(
@@ -97,12 +98,15 @@ def store_ballByball(api_url, headers, querystring,match_id):
                 },
             )
             print(f"Ball-by-Ball data updated for Match {match_id}")
-
+        
         except Matches.DoesNotExist:
             print(f"Match with ID {match_id} does not exist.")
+        except Exception as e:
+            print(f"An error occurred: {e}")
 
     else:
         print(f"Failed to fetch data: {response.status_code}")
+
          
       
 @shared_task
@@ -111,9 +115,15 @@ def fetch_ballByball():
     matches = Matches.objects.exclude(state = 'Upcoming').exclude(state = 'Complete').exclude(match_type = 'League').exclude(match_type = 'Domestic')
     
     # nitay
+    # headers = {
+    #     "x-rapidapi-key": "b75aac835cmshaa98b93c54be468p128cc8jsn66c9ac71b9e8",
+    #     "x-rapidapi-host": "crickbuzz-official-apis.p.rapidapi.com"
+    # }
+    
+     # Niloy Das
     headers = {
-        "x-rapidapi-key": "b75aac835cmshaa98b93c54be468p128cc8jsn66c9ac71b9e8",
-        "x-rapidapi-host": "crickbuzz-official-apis.p.rapidapi.com"
+        "x-rapidapi-key": "2c9bb38fd1msh7f2cfcda4cf807ep11c91ajsn7e28e3ba076e",
+        "x-rapidapi-host": "cricbuzz-cricket.p.rapidapi.com"
     }
     
     querystring = {"inning":"2","lastTimeStamp":"1664380633235"}

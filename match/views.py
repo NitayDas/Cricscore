@@ -14,6 +14,24 @@ from django.http import JsonResponse
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
 import re
+# from .sentiment_analysis_setup import predict_sentiment
+from langdetect import detect
+
+slang_words_map = {
+    "en": [
+        "badword", "swearword", "insult", "curseword"  # Add English slang words
+    ],
+    "bn": [
+        "অশ্লীল", "অপমানজনক", "অভদ্র", "অশোভন", "গালি"  # Add Bengali slang words
+    ],
+    "es": [
+        "maldición", "grosería", "insulto"  # Add Spanish slang words
+    ],
+    "fr": [
+        "injure", "grossièreté", "insulte"  # Add French slang words
+    ]
+}
+
 
 
 def home(request):
@@ -71,8 +89,8 @@ class MatchesList(APIView):
     permission_classes = [AllowAny]
     def get(self, request):
         today=timezone.now()
-        five_days_earlier = today - timedelta(days=10)
-        seven_days_later = today + timedelta(days=10)
+        five_days_earlier = today - timedelta(days=50)
+        seven_days_later = today + timedelta(days=50)
         matches=Matches.objects.filter(start_date__date__range=(five_days_earlier.date(),seven_days_later.date()))
         serializer = MatchesSerializer(matches,many=True)
         return Response(serializer.data)
@@ -154,10 +172,42 @@ class BallByBallView(APIView):
     
     
 
-def filter_slang_words(content, slang_words):
-    # Create a single regex pattern that matches any slang word in the list
+def filter_slang_words(content):
+    try:
+        # Detect the language of the content
+        detected_language = detect(content)
+    except Exception:
+        # Default to English if detection fails
+        detected_language = "en"
+        
+    # print(detected_language)
+    
+    # Get the slang words for the detected language, default to English if not found
+    slang_words = slang_words_map.get(detected_language, slang_words_map.get("en", []))
+    # print(slang_words)
+    
+    # Tokenize the input text
+    words = re.findall(r'\b\w+\b|[^\w\s]', content, re.UNICODE)
+    # print(words)
+    
+    # Create a set of slang words for faster lookup
+    slang_set = set(slang_words)
+    
     pattern = r'\b(' + '|'.join(map(re.escape, slang_words)) + r')\b'
-    return re.sub(pattern, '***', content, flags=re.IGNORECASE)
+    return re.sub(pattern, '***', content, flags=re.IGNORECASE | re.UNICODE)
+    
+    # # Replace any slang word with '***'
+    # filtered_words = [
+    #     '***' if word in slang_set else word
+    #     for word in words
+    # ]
+    
+    # Reconstruct the content
+    return ''.join(
+        filtered_words[i] + ' ' if filtered_words[i].isalnum() else filtered_words[i]
+        for i in range(len(filtered_words))
+    )
+
 
 
 class CommentView(APIView):
@@ -181,11 +231,16 @@ class CommentView(APIView):
             return Response({'error': 'OverSummary not found.'}, status=status.HTTP_404_NOT_FOUND)
 
        parent_id = request.data.get("parent")
+       comment = request.data.get("content", "")
        
        # NLP method
+    #    sentiment = predict_sentiment(comment)
+    #    print(sentiment)
+       
+      
        slang_words = ["shala", "bloody", "stupid", "শালা"]
        # Filter slang words from the comment content
-       filtered_content = filter_slang_words(request.data.get("content", ""), slang_words)
+       filtered_content = filter_slang_words(comment)
        
        data = {
             "event": event.id,  

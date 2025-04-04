@@ -56,6 +56,7 @@ class OverSummary(models.Model):
     def __str__(self):
         return f"{self.match_id}-{self.InningsId}-({self.OverNum})"
     
+    
 class BallByBall(models.Model):
     match = models.OneToOneField(Matches, on_delete=models.CASCADE, related_name="current_ball_by_ball")
     batsman_striker = models.JSONField() 
@@ -96,7 +97,8 @@ class CoverImage(models.Model):
     
     def __str__(self):
         return self.caption
-          
+    
+             
 class Story(models.Model):
     story_id = models.IntegerField(primary_key=True) 
     headline = models.CharField(max_length=255) 
