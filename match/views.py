@@ -14,8 +14,9 @@ from django.http import JsonResponse
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
 import re
-# from .sentiment_analysis_setup import predict_sentiment
 from langdetect import detect
+from .tasks import check_sentiment_and_censor
+from .comment_sentiment import predict_sentiment
 
 slang_words_map = {
     "en": [
@@ -95,33 +96,7 @@ class MatchesList(APIView):
         serializer = MatchesSerializer(matches,many=True)
         return Response(serializer.data)
     
-# class MatchDetails(APIView):
-#     def get(self,request,match_id):
-#         # print(match_id)
-#         match = Matches.objects.get(match_id=match_id)
-#         innings_id = match.innings_id
-#         # print(innings_id)
-#         oversummary = OverSummary.objects.filter(match_id=match_id,InningsId=innings_id)
-#         serializer = OverSummarySerializer(oversummary,many=True)
-#         return Response(serializer.data)
 
-
-# class ScoreboardDetails(APIView):
-#     def get(self,request,match_id):
-#         try:
-#             match = Matches.objects.get(match_id=match_id)
-            
-#         except Matches.DoesNotExist:
-#             return Response({"error": "Match not found"}, status=status.HTTP_404_NOT_FOUND)
-        
-#         scoreboard = Scoreboard.objects.filter(match=match)
-        
-#         if not scoreboard.exists():
-#             return Response({"error": "No scoreboards found for this match"}, status=status.HTTP_404_NOT_FOUND)
-        
-#         serializer = ScoreboardSerializer(scoreboard, many=True)
-#         return Response(serializer.data, status=status.HTTP_200_OK)
-        
     
 class overSummary_and_Scoreboard(APIView):
     permission_classes = [AllowAny]
@@ -233,10 +208,6 @@ class CommentView(APIView):
        parent_id = request.data.get("parent")
        comment = request.data.get("content", "")
        
-       # NLP method
-    #    sentiment = predict_sentiment(comment)
-    #    print(sentiment)
-       
       
        slang_words = ["shala", "bloody", "stupid", "শালা"]
        # Filter slang words from the comment content
@@ -250,9 +221,16 @@ class CommentView(APIView):
             
         }
 
+
        serializer = CommentSerializer(data=data)
        if serializer.is_valid():
-            serializer.save() 
+            comment_instance = serializer.save()
+            
+            #trigger the predict function
+            # sentiment = predict_sentiment(comment_instance.content)
+            # print("sentiment", sentiment)
+            check_sentiment_and_censor.delay(comment_instance.id)
+            
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         
        print(serializer.errors)

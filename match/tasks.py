@@ -4,6 +4,9 @@ import requests
 import datetime
 from django.utils.timezone import make_aware
 import math
+from .comment_sentiment import predict_sentiment
+
+
 
 # Storing MacthesList
 def Store_And_Update_Matches(api_url, headers):
@@ -237,6 +240,24 @@ def fetch_oversummary(self):
         store_oversummary(oversummary_url,headers)
     
     return "Done"
+
+
+
+@shared_task
+def check_sentiment_and_censor(comment_id):
+    from .models import Comment
+    try:
+        comment = Comment.objects.get(id=comment_id)
+        sentiment = predict_sentiment(comment.content)
+        print("sentiment", sentiment)
+
+        # If sentiment is very negative, censor it
+        if sentiment[0].strip() == 'Very Negative':  # Adjust condition as needed
+            print("yes")
+            comment.content = "****"
+            comment.save()
+    except Comment.DoesNotExist:
+        pass
 
     
     
