@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'match',
+    'report',
     'django_celery_beat',
     'django_celery_results',
     'channels',
