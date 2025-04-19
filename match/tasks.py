@@ -18,6 +18,7 @@ def Store_And_Update_Matches(api_url, headers):
 
         if response.status_code == 200:
             match_data = response.json()
+            print(match_data)
             
             for match_type in match_data['typeMatches']:
                 
@@ -84,6 +85,7 @@ def Store_And_Update_Matches(api_url, headers):
                         if not existing_match:
                             Matches.objects.create(
                                 match_id=match_info['matchInfo']['matchId'],
+                                match_format = match_info['matchInfo']['matchFormat'],
                                 series = series_obj if series_obj else None,
                                 match_type=match_type['matchType'],
                                 series_name=series_name,

@@ -17,6 +17,7 @@ class Matches(models.Model):
     series = models.ForeignKey(Series, related_name='match', on_delete=models.CASCADE, null=True, blank=True)
     match_id = models.CharField(null=True,max_length=100)
     match_type = models.CharField(max_length=50)
+    match_format = models.CharField(max_length=50, null=True, blank=True) 
     series_name= models.CharField(max_length=255)
     team1 = models.CharField(max_length=50)
     team2 = models.CharField(max_length=50)

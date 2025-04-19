@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from rest_framework import status,generics
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
+from .models import MatchCommentStats
 
 
 class CommentMatchTypeReportView(APIView): 
@@ -82,3 +83,36 @@ class CommentSentimentReportView(APIView):
         }  
 
         return Response(report, status=status.HTTP_200_OK)
+    
+    
+
+
+def update_comment_stats_for_comment(comment):
+    try:
+        event = comment.event
+        match_id = event.match_id
+
+        match = Matches.objects.filter(match_id=match_id).first()
+        if not match:
+            return  # No match found
+
+        stats_obj, created = MatchCommentStats.objects.get_or_create(match_type=match.match_type)
+
+        # Step 5: Normalize match format
+        match_format = (match.match_format or '')
+        format_map = {
+            'T20': 't20_count',
+            'Oneday': 'one_day_count',
+            'Test': 'test_count',
+        }
+        field_name = format_map.get(match_format)
+        if not field_name:
+            return  # Unknown format, skip
+
+        # Step 6: Increment the count
+        current_value = getattr(stats_obj, field_name, 0)
+        setattr(stats_obj, field_name, current_value + 1)
+        stats_obj.save()
+
+    except Exception as e:
+        print("Error updating CommentStats:", str(e))
