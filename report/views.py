@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from match.models import Comment, Matches
+from match.models import Comment, Matches, OverSummary
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status,generics
@@ -7,54 +7,6 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
 from .models import MatchCommentStats
 
-
-class CommentMatchTypeReportView(APIView): 
-    permission_classes = [AllowAny]
-    def get(self, request):  
-        comments = Comment.objects.select_related('event')  
-
-        level_count = {  
-            'International': 0,  
-            'Domestic': 0,  
-            'League': 0,  
-            'Unknown': 0  
-        }  
-
-        total_comments = 0  
-
-        for comment in comments:  
-            over_summary = comment.event  
-            match = Matches.objects.filter(match_id=over_summary.match_id).first()  
-
-            if match:  
-                level = getattr(match, 'match_type', '').lower()  
-
-                if 'international' in level:  
-                    level_count['International'] += 1  
-                elif 'domestic' in level:  
-                    level_count['Domestic'] += 1  
-                elif 'league' in level:  
-                    level_count['League'] += 1  
-                else:  
-                    level_count['Unknown'] += 1  
-
-                total_comments += 1  
-
-        # Calculate percentage  
-        report = {}  
-        for key in level_count:  
-            percentage = (level_count[key] / total_comments) * 100 if total_comments > 0 else 0  
-            report[key] = {  
-                'count': level_count[key],  
-                'percentage': round(percentage, 2)  
-            }  
-
-        return Response({  
-            'total_comments': total_comments,  
-            'match_level_distribution': report  
-        }, status=status.HTTP_200_OK)
-            
-    
     
         
 class CommentSentimentReportView(APIView):
@@ -84,6 +36,46 @@ class CommentSentimentReportView(APIView):
 
         return Response(report, status=status.HTTP_200_OK)
     
+    
+
+
+def update_match_comment_stats(): 
+    formats = ['T20', 'One Day', 'TEST'] 
+    types = ['International', 'League', 'Domestic']
+
+    for match_type in types:
+        # Initialize counters
+        counts = {
+            'T20': 0,
+            'One Day': 0,
+            'TEST': 0,
+        }
+
+        # Get matches of this type
+        matches = Matches.objects.filter(match_type=match_type)
+
+        # Map match_id to match_format
+        match_format_map = {m.match_id: m.match_format for m in matches}
+
+        # Get OverSummaries for these matches
+        summaries = OverSummary.objects.filter(match_id__in=match_format_map.keys())
+
+        for summary in summaries:
+            match_format = match_format_map.get(summary.match_id)
+            if match_format in formats:
+                counts[match_format] += summary.comments.count()
+
+        # Save or update
+        MatchCommentStats.objects.update_or_create(
+            match_type=match_type,
+            defaults={
+                't20_count': counts['T20'],
+                'one_day_count': counts['One Day'],
+                'test_count': counts['TEST'],
+            }
+        )
+        
+        
     
 
 
