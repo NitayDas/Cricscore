@@ -106,8 +106,8 @@ if __name__ == "__main__":
     datasets = load_dataset(
         "csv", 
         data_files={ 
-            "train": "F:/Rest Api/Cricscore/match/sentiment_analysis/data/train.csv",
-            "val": "F:/Rest Api/Cricscore/match/sentiment_analysis/data/val.csv"
+            "train": "C:/Users/Md Jannat Hasan/Desktop/Nitay/Cricscore/match/sentiment_analysis/data/train.csv",
+            "val": "C:/Users/Md Jannat Hasan/Desktop/Nitay/Cricscore/match/sentiment_analysis/data/val.csv"
         }
     )
 

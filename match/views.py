@@ -17,6 +17,7 @@ import re
 from langdetect import detect
 from .tasks import check_sentiment_and_censor
 from .comment_sentiment import predict_sentiment
+from report.views import update_comment_stats_for_comment
 
 slang_words_map = {
     "en": [
@@ -225,10 +226,9 @@ class CommentView(APIView):
        serializer = CommentSerializer(data=data)
        if serializer.is_valid():
             comment_instance = serializer.save()
+            update_comment_stats_for_comment(comment_instance) 
             
             #trigger the predict function
-            # sentiment = predict_sentiment(comment_instance.content)
-            # print("sentiment", sentiment)
             check_sentiment_and_censor.delay(comment_instance.id)
             
             return Response(serializer.data, status=status.HTTP_201_CREATED)

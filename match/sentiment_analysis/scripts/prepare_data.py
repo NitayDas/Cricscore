@@ -32,8 +32,13 @@ def prepare_datasets(model_name, train_path, val_path):
 
 if __name__ == "__main__":
     model_name = "tabularisai/multilingual-sentiment-analysis"
-    train_path = "F:/Rest Api/Cricscore/match/sentiment_analysis/data/train.csv"
-    val_path = "F:/Rest Api/Cricscore/match/sentiment_analysis/data/val.csv"
+    # train_path = "F:/Rest Api/Cricscore/match/sentiment_analysis/data/train.csv"
+    # val_path = "F:/Rest Api/Cricscore/match/sentiment_analysis/data/val.csv"
+    
+    
+    train_path = "C:/Users/Md Jannat Hasan/Desktop/Nitay/Cricscore/match/sentiment_analysis/data/train.csv"
+    val_path = "C:/Users/Md Jannat Hasan/Desktop/Nitay/Cricscore/match/sentiment_analysis/data/val.csv"
+    
     
     # Prepare the datasets
     datasets = prepare_datasets(model_name, train_path, val_path)
