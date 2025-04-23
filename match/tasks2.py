@@ -75,7 +75,7 @@ def store_ballByball(api_url, headers, querystring,match_id):
     if response.status_code == 200:
         data = response.json()
         try:
-            # print(data)
+            print("BallByBallData",data)
             match = Matches.objects.get(match_id=match_id)
             
             miniscore = data.get("miniscore", {})

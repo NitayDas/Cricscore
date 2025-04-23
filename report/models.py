@@ -10,3 +10,12 @@ class MatchCommentStats(models.Model):
 
     def __str__(self):
         return f"{self.match_type} | T20: {self.t20_count}, ODI: {self.one_day_count}, Test: {self.test_count}"
+    
+    
+class TeamCommentStats(models.Model):
+    team_name = models.CharField(max_length=100, unique=True)
+    good_comments = models.PositiveIntegerField(default=0)
+    bad_comments = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.team_name} | Good: {self.good_comments}, Bad: {self.bad_comments}"

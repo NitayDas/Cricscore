@@ -5,7 +5,9 @@ from rest_framework.views import APIView
 from rest_framework import status,generics
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
-from .models import MatchCommentStats
+from .models import MatchCommentStats, TeamCommentStats
+from .serializers import MatchCommentStatsSerializer, TeamCommentStatsSerializer
+
 
     
         
@@ -36,6 +38,19 @@ class CommentSentimentReportView(APIView):
 
         return Response(report, status=status.HTTP_200_OK)
     
+    
+class CommentMatchTypeReportView(APIView): 
+    def get(self, request): 
+        stats = MatchCommentStats.objects.all() 
+        serializer = MatchCommentStatsSerializer(stats, many=True) 
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    
+class TeamCommentStatsView(APIView):
+    def get(self, request):
+        stats = TeamCommentStats.objects.all()
+        serializer = TeamCommentStatsSerializer(stats, many=True)
+        return Response(serializer.data)
     
 
 
@@ -108,3 +123,32 @@ def update_comment_stats_for_comment(comment):
 
     except Exception as e:
         print("Error updating CommentStats:", str(e))
+        
+        
+        
+def classify_comment_sentiment(content):
+    if '****' in content:
+        return 'bad'
+    else:
+        return 'good'
+
+def update_team_comment_stats(comment):
+    try:
+        over_summary = comment.event
+        match = Matches.objects.get(match_id=over_summary.match_id)
+        
+        sentiment = classify_comment_sentiment(comment.content)
+        print("ReportSentiment:", sentiment)
+        
+        # Update stats for both teams
+        for team in [match.team1, match.team2]:
+            stats, created = TeamCommentStats.objects.get_or_create(team_name=team)
+            if sentiment == 'bad':
+                stats.bad_comments += 1
+            else:
+                stats.good_comments += 1
+            stats.save()
+    except Matches.DoesNotExist:
+        print("Match not found for the comment")
+    except Exception as e:
+        print(f"Error updating team comment stats: {str(e)}")
