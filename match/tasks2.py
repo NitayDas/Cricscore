@@ -68,7 +68,7 @@ def fetch_and_store_stories():
         
         
 def store_ballByball(api_url, headers, querystring,match_id):
-    from . models import Matches, BallByBall
+    from . models import Matches, StrikerInfo
     
     response = requests.get(api_url, headers=headers)
     
@@ -87,7 +87,7 @@ def store_ballByball(api_url, headers, querystring,match_id):
             cur_overs_stats = miniscore.get("curOvsStats", {})
 
             # Update or create BallByBall data
-            BallByBall.objects.update_or_create(
+            StrikerInfo.objects.update_or_create(
                 match=match,
                 defaults={
                     "batsman_striker": batsman_striker,

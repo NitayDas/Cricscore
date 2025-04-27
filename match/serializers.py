@@ -107,7 +107,7 @@ class NewsSerializer(serializers.ModelSerializer):
         fields = '__all__'  
         
         
-class BallByBallSerializer(serializers.ModelSerializer):
+class StrikerInfoSerializer(serializers.ModelSerializer):
     class Meta:
-        model = BallByBall
+        model = StrikerInfo
         fields = '__all__' 

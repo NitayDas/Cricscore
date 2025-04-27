@@ -8,6 +8,7 @@ from .comment_sentiment import predict_sentiment
 
 
 
+
 # Storing MacthesList
 def Store_And_Update_Matches(api_url, headers):
     from .models import Matches,Series
@@ -248,10 +249,13 @@ def fetch_oversummary(self):
 @shared_task
 def check_sentiment_and_censor(comment_id):
     from .models import Comment
+    from report.views import update_team_comment_stats
     try:
         comment = Comment.objects.get(id=comment_id)
         sentiment = predict_sentiment(comment.content)
         print("sentiment", sentiment)
+        
+        update_team_comment_stats(comment,sentiment)
 
         # If sentiment is very negative, censor it
         if sentiment[0].strip() == 'Very Negative':  # Adjust condition as needed

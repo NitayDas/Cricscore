@@ -58,7 +58,7 @@ class OverSummary(models.Model):
         return f"{self.match_id}-{self.InningsId}-({self.OverNum})"
     
     
-class BallByBall(models.Model):
+class StrikerInfo(models.Model):
     match = models.OneToOneField(Matches, on_delete=models.CASCADE, related_name="current_ball_by_ball")
     batsman_striker = models.JSONField() 
     batsman_non_striker = models.JSONField()  
