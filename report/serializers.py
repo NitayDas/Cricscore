@@ -4,7 +4,7 @@ from .models import MatchCommentStats, TeamCommentStats
 class MatchCommentStatsSerializer(serializers.ModelSerializer):
     class Meta: 
         model = MatchCommentStats 
-        fields = 'all'
+        fields = '__all__'
         
         
 class TeamCommentStatsSerializer(serializers.ModelSerializer):

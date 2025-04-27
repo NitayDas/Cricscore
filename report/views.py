@@ -39,7 +39,8 @@ class CommentSentimentReportView(APIView):
         return Response(report, status=status.HTTP_200_OK)
     
     
-class CommentMatchTypeReportView(APIView): 
+class CommentMatchTypeReportView(APIView):
+    permission_classes = [AllowAny] 
     def get(self, request): 
         stats = MatchCommentStats.objects.all() 
         serializer = MatchCommentStatsSerializer(stats, many=True) 
@@ -47,6 +48,7 @@ class CommentMatchTypeReportView(APIView):
     
     
 class TeamCommentStatsView(APIView):
+    permission_classes = [AllowAny]
     def get(self, request):
         stats = TeamCommentStats.objects.all()
         serializer = TeamCommentStatsSerializer(stats, many=True)
@@ -126,24 +128,18 @@ def update_comment_stats_for_comment(comment):
         
         
         
-def classify_comment_sentiment(content):
-    if '****' in content:
-        return 'bad'
-    else:
-        return 'good'
 
-def update_team_comment_stats(comment):
+def update_team_comment_stats(comment,sentiment):
     try:
         over_summary = comment.event
         match = Matches.objects.get(match_id=over_summary.match_id)
         
-        sentiment = classify_comment_sentiment(comment.content)
         print("ReportSentiment:", sentiment)
         
         # Update stats for both teams
         for team in [match.team1, match.team2]:
             stats, created = TeamCommentStats.objects.get_or_create(team_name=team)
-            if sentiment == 'bad':
+            if sentiment[0].strip() == 'Very Negative':
                 stats.bad_comments += 1
             else:
                 stats.good_comments += 1
