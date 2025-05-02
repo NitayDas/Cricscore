@@ -112,7 +112,7 @@ def store_ballByball(api_url, headers, querystring,match_id):
 @shared_task
 def fetch_ballByball():
     from .models import Matches
-    matches = Matches.objects.exclude(state = 'Upcoming').exclude(state = 'Complete').exclude(match_type = 'League').exclude(match_type = 'Domestic')
+    matches = Matches.objects.exclude(state = 'Upcoming').exclude(state = 'Complete').exclude(match_type = 'Domestic')
     
     # nitay
     # headers = {

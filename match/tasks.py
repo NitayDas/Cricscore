@@ -236,7 +236,7 @@ def fetch_oversummary(self):
     'x-rapidapi-host': "cricbuzz-cricket.p.rapidapi.com"
     }
     
-    matches = Matches.objects.exclude(state = 'Upcoming').exclude(state = 'Complete').exclude(match_type = 'League').exclude(match_type = 'Domestic')
+    matches = Matches.objects.exclude(state = 'Upcoming').exclude(state = 'Complete').exclude(match_type = 'Domestic')
     
     for match in matches:
         oversummary_url= f'https://cricbuzz-cricket.p.rapidapi.com/mcenter/v1/{match.match_id}/comm'
